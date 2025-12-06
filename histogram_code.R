@@ -70,4 +70,44 @@ cat("Clean observations (2002-2019, budget ≤ $50M):", nrow(data_clean), "\n")
 cat("Year range:", min(data_clean$year_cleaned), "-", max(data_clean$year_cleaned), "\n")
 cat("Budget range: $", scales::comma(min(data_clean$budget_cleaned)), " - $", 
     scales::comma(max(data_clean$budget_cleaned)), "\n\n")
+# STEP 1: CREATE HISTOGRAM (Dependent Variable Only)
+
+
+cat("STEP 1: Checking for Normal Distribution\n")
+
+
+# Calculate mean and standard deviation for normal curve
+mean_rating <- mean(data_clean$avg_vote_cleaned)
+sd_rating <- sd(data_clean$avg_vote_cleaned)
+
+# Create histogram with normal curve overlay and borders
+p_histogram <- ggplot(data_clean, aes(x = avg_vote_cleaned)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, 
+                 fill = "#2E86AB", alpha = 0.7, color = "white") +
+  stat_function(fun = dnorm, 
+                args = list(mean = mean_rating, sd = sd_rating),
+                color = "#A23B72", size = 1.5, linetype = "dashed") +
+  labs(
+    title = "Histogram: Average IMDb Rating Distribution",
+    subtitle = "Blue bars = Observed data | Purple dashed line = Theoretical normal curve (for comparison)",
+    x = "Average IMDb Rating (rating score)",
+    y = "Density",
+    caption = paste0("Mean = ", round(mean_rating, 2), 
+                     " | SD = ", round(sd_rating, 2),
+                     " | n = ", nrow(data_clean))
+  ) +
+  theme_classic(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(color = "gray30", size = 11, hjust = 0),
+    panel.border = element_rect(fill = NA, color = "black", size = 1),
+    axis.line = element_blank(),
+    plot.caption = element_text(hjust = 0, color = "gray50")
+  )
+
+# Save histogram
+dir.create("correlation_plots", showWarnings = FALSE)
+ggsave("correlation_plots/1_histogram.png", p_histogram, 
+       width = 12, height = 8, dpi = 300, bg = "white")
+
 
