@@ -193,3 +193,50 @@ if (both_normal) {
   test_method <- "Spearman & Kendall"
 }
 
+# STEP 3: CORRELATION TEST RESULTS
+
+
+cat("STEP 3: Correlation Test Results\n")
+
+
+if (both_normal) {
+  # Pearson only
+  cat(test_name, "=", round(test_result$estimate, 4), "\n")
+  cat("p-value =", format(test_result$p.value, digits = 5), "\n")
+  
+  if (!is.null(test_result$conf.int)) {
+    cat("95% CI: [", round(test_result$conf.int[1], 4), ",", 
+        round(test_result$conf.int[2], 4), "]\n")
+  }
+} else {
+  # Spearman and Kendall
+  cat("SPEARMAN'S ρ =", round(spearman_result$estimate, 4), "\n")
+  cat("  p-value =", format(spearman_result$p.value, digits = 5), "\n\n")
+  
+  cat("KENDALL'S τ =", round(kendall_result$estimate, 4), "\n")
+  cat("  p-value =", format(kendall_result$p.value, digits = 5), "\n")
+}
+
+cat("\n")
+
+# Determine correlation strength
+coef_val <- abs(as.numeric(test_result$estimate))
+if (coef_val < 0.3) {
+  strength <- "WEAK"
+} else if (coef_val < 0.7) {
+  strength <- "MODERATE"
+} else {
+  strength <- "STRONG"
+}
+
+direction <- ifelse(test_result$estimate > 0, "positive", "negative")
+
+# Statistical significance
+if (test_result$p.value < 0.05) {
+  cat("CONCLUSION: Statistically significant correlation (p < 0.05)\n")
+  cat("Strength:", strength, direction, "correlation\n")
+} else {
+  cat("CONCLUSION: NO statistically significant correlation (p >= 0.05)\n")
+  cat("Budget does NOT significantly influence IMDb ratings\n")
+}
+
