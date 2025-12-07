@@ -304,3 +304,69 @@ if (both_normal) {
 
 cat(summary_note)
 cat("\n\n")
+
+# IMPROVED SCATTERPLOT with cleaner x-axis (no $, no M)
+# Convert budget to millions for cleaner numbers
+data_clean$budget_millions <- data_clean$budget_cleaned / 1000000
+
+# Calculate nice break points for x-axis (5 million increments)
+x_breaks <- seq(0, 50, by = 5)  # 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50
+
+p_scatter <- ggplot(data_clean, aes(x = budget_millions, y = avg_vote_cleaned)) +
+  geom_point(alpha = 0.5, color = "#2E86AB", size = 3) +
+  geom_smooth(method = "lm", color = "#A23B72", fill = "#F18F01", 
+              alpha = 0.2, size = 1.2) +
+  # Clean x-axis with plain numbers
+  scale_x_continuous(
+    breaks = x_breaks,
+    labels = x_breaks,
+    limits = c(0, 50),
+    expand = c(0.02, 0.02)
+  ) +
+  # Clean y-axis with better breaks
+  scale_y_continuous(
+    breaks = seq(0, 10, by = 1),
+    limits = c(floor(min(data_clean$avg_vote_cleaned)), 
+               ceiling(max(data_clean$avg_vote_cleaned))),
+    expand = c(0.02, 0.02)
+  ) +
+  labs(
+    title = "Scatterplot: Movie Budget vs IMDb Average Rating",
+    subtitle = plot_subtitle,
+    x = "Budget (millions USD)",
+    y = "Average IMDb Rating",
+    caption = paste0("n = ", nrow(data_clean), " movies (2002-2019, budget ≤ $50M) | Test: ", test_method)
+  ) +
+  theme_classic(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(color = "gray30", size = 11, hjust = 0),
+    panel.border = element_rect(fill = NA, color = "black", size = 1),
+    axis.line = element_blank(),
+    plot.caption = element_text(hjust = 0, color = "gray50"),
+    # Improve axis text
+    axis.text = element_text(size = 12, color = "black"),
+    axis.title = element_text(size = 13, face = "bold"),
+    # Add minor grid lines for better readability
+    panel.grid.major = element_line(color = "gray90", size = 0.3),
+    panel.grid.minor = element_line(color = "gray95", size = 0.2)
+  )
+
+ggsave("correlation_plots/2_scatterplot.png", p_scatter, 
+       width = 16, height = 10, dpi = 600, bg = "white")
+
+# Save summary note as text file
+writeLines(summary_note, "correlation_plots/ANALYSIS_SUMMARY.txt")
+
+cat("✓ ULTRA HIGH-RESOLUTION plots saved to 'correlation_plots/' directory\n")
+cat("  1. 1_histogram.png - Dependent variable (16x10 inches @ 600 DPI)\n")
+cat("  2. 2_scatterplot.png - Correlation plot (16x10 inches @ 600 DPI)\n")
+cat("  3. ANALYSIS_SUMMARY.txt - Complete analysis summary\n\n")
+
+cat("=" , rep("=", 70), "\n", sep = "")
+cat(summary_note)
+cat("\n", rep("=", 71), "\n\n", sep = "")
+
+# Display plots
+print(p_histogram)
+print(p_scatter)
