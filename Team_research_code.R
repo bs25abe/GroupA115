@@ -240,3 +240,67 @@ if (test_result$p.value < 0.05) {
   cat("Budget does NOT significantly influence IMDb ratings\n")
 }
 
+# STEP 4: CREATE SCATTERPLOT WITH IMPROVED AXES
+
+
+cat("\n\nSTEP 4: Creating Scatterplot with Analysis Summary\n")
+
+
+# Format p-value for display (avoid scientific notation)
+if (test_result$p.value < 0.001) {
+  p_value_text <- "< 0.001"
+} else {
+  p_value_text <- paste("=", round(test_result$p.value, 4))
+}
+
+# Create subtitle based on test type - REMOVED KENDALL FROM SUBTITLE
+if (both_normal) {
+  plot_subtitle <- paste0(test_name, " = ", round(test_result$estimate, 3), 
+                          ", p-value ", p_value_text, " | ", strength, " ", direction, " correlation")
+} else {
+  # Only show Spearman in subtitle
+  spearman_p <- ifelse(spearman_result$p.value < 0.001, "< 0.001", 
+                       paste("=", round(spearman_result$p.value, 4)))
+  
+  plot_subtitle <- paste0(
+    "Spearman's ρ = ", round(spearman_result$estimate, 3), " (p ", spearman_p, ") | ",
+    strength, " ", direction, " correlation"
+  )
+}
+
+# Create detailed summary note
+if (both_normal) {
+  summary_note <- paste0(
+    "ANALYSIS SUMMARY:\n",
+    "• Data Filters: Years 2002-2019, Budget ≤ $50 million\n",
+    "• Data Distribution: Both variables are NORMALLY DISTRIBUTED\n",
+    "  (Tested on ALL ", nrow(data_clean), " observations using Kolmogorov-Smirnov test)\n",
+    "• Test Used: PEARSON CORRELATION\n",
+    "• Pearson's r = ", round(test_result$estimate, 3), " (p ", p_value_text, ")\n",
+    "• Correlation Strength: ", strength, " ", direction, " correlation\n",
+    "• Interpretation: ", 
+    ifelse(test_result$p.value < 0.05, 
+           paste0("There is a statistically significant ", tolower(strength), " ", direction, " relationship"),
+           "No statistically significant relationship found")
+  )
+} else {
+  summary_note <- paste0(
+    "ANALYSIS SUMMARY:\n",
+    "• Data Filters: Years 2002-2019, Budget ≤ $50 million\n",
+    "• Data Distribution: Variables are NOT NORMALLY DISTRIBUTED\n",
+    "  (Tested on ALL ", nrow(data_clean), " observations using Kolmogorov-Smirnov test)\n",
+    "• Tests Used: SPEARMAN & KENDALL CORRELATION (non-parametric)\n",
+    "• Spearman's ρ = ", round(spearman_result$estimate, 3), " (p ", 
+    ifelse(spearman_result$p.value < 0.001, "< 0.001", paste("=", round(spearman_result$p.value, 4))), ")\n",
+    "• Kendall's τ = ", round(kendall_result$estimate, 3), " (p ", 
+    ifelse(kendall_result$p.value < 0.001, "< 0.001", paste("=", round(kendall_result$p.value, 4))), ")\n",
+    "• Correlation Strength: ", strength, " ", direction, " correlation\n",
+    "• Interpretation: ", 
+    ifelse(test_result$p.value < 0.05, 
+           paste0("There is a statistically significant ", tolower(strength), " ", direction, " relationship"),
+           "No statistically significant relationship found")
+  )
+}
+
+cat(summary_note)
+cat("\n\n")
