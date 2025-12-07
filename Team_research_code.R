@@ -157,3 +157,39 @@ if (ks_vote$p.value < 0.05) {
   vote_normal <- TRUE
 }
 
+# STEP 2: DECIDE WHICH CORRELATION TEST TO USE
+
+
+cat("STEP 2: Selecting Appropriate Correlation Test\n")
+
+
+both_normal <- budget_normal && vote_normal
+
+if (both_normal) {
+  cat("DECISION: Both variables are normally distributed\n")
+  cat("→ Using PEARSON correlation test\n\n")
+  
+  test_result <- cor.test(data_clean$budget_cleaned, 
+                          data_clean$avg_vote_cleaned, 
+                          method = "pearson")
+  test_name <- "Pearson's r"
+  test_method <- "Pearson"
+  
+} else {
+  cat("DECISION: At least one variable is NOT normally distributed\n")
+  cat("→ Using SPEARMAN and KENDALL correlation tests (non-parametric)\n\n")
+  
+  # Run both Spearman and Kendall
+  spearman_result <- cor.test(data_clean$budget_cleaned, 
+                              data_clean$avg_vote_cleaned, 
+                              method = "spearman")
+  
+  kendall_result <- cor.test(data_clean$budget_cleaned, 
+                             data_clean$avg_vote_cleaned, 
+                             method = "kendall")
+  
+  test_result <- spearman_result  # Primary test for plotting
+  test_name <- "Spearman's ρ"
+  test_method <- "Spearman & Kendall"
+}
+
