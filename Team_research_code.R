@@ -116,3 +116,44 @@ p_histogram <- ggplot(data_clean, aes(x = avg_vote_cleaned)) +
 dir.create("correlation_plots", showWarnings = FALSE)
 ggsave("correlation_plots/1_histogram.png", p_histogram, 
        width = 16, height = 10, dpi = 600, bg = "white")
+
+# NORMALITY TESTS (Using ALL Data)
+
+
+cat("Testing normality using ALL", nrow(data_clean), "observations\n")
+cat("Using Kolmogorov-Smirnov test (works with any sample size)\n\n")
+
+# Kolmogorov-Smirnov test for budget
+ks_budget <- ks.test(data_clean$budget_cleaned, "pnorm", 
+                     mean = mean(data_clean$budget_cleaned), 
+                     sd = sd(data_clean$budget_cleaned))
+
+cat("Budget Variable:\n")
+cat("  Kolmogorov-Smirnov D =", round(ks_budget$statistic, 4), "\n")
+cat("  p-value =", format(ks_budget$p.value, digits = 5), "\n")
+
+if (ks_budget$p.value < 0.05) {
+  cat("  Result: NOT normally distributed (p < 0.05)\n\n")
+  budget_normal <- FALSE
+} else {
+  cat("  Result: Appears normally distributed (p >= 0.05)\n\n")
+  budget_normal <- TRUE
+}
+
+# Kolmogorov-Smirnov test for avg_vote
+ks_vote <- ks.test(data_clean$avg_vote_cleaned, "pnorm", 
+                   mean = mean(data_clean$avg_vote_cleaned), 
+                   sd = sd(data_clean$avg_vote_cleaned))
+
+cat("Avg_Vote Variable:\n")
+cat("  Kolmogorov-Smirnov D =", round(ks_vote$statistic, 4), "\n")
+cat("  p-value =", format(ks_vote$p.value, digits = 5), "\n")
+
+if (ks_vote$p.value < 0.05) {
+  cat("  Result: NOT normally distributed (p < 0.05)\n\n")
+  vote_normal <- FALSE
+} else {
+  cat("  Result: Appears normally distributed (p >= 0.05)\n\n")
+  vote_normal <- TRUE
+}
+
